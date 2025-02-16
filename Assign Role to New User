@@ -1,0 +1,24 @@
+add_action('jet-form-builder/custom-action/register-new-staff-member', function($request, $action_handler) {
+    // Extract the user ID and staff role from the submitted form data
+    $user_id = isset($request['user_id']) ? intval($request['user_id']) : 0;
+    $role = isset($request['staff_role']) ? sanitize_text_field($request['staff_role']) : '';
+
+    // Validate role
+    $valid_roles = ['credit_officer', 'credit_administrator', 'credit_manager', 'collection_officer'];
+    if (!in_array($role, $valid_roles)) {
+        // Return an error if the role is invalid
+        $action_handler->add_error('staff_role', 'Invalid role selected.');
+        return;
+    }
+
+    // Validate the user ID
+    if (!$user_id || !get_userdata($user_id)) {
+        // Return an error if the user ID is invalid
+        $action_handler->add_error('user_id', 'Invalid user ID.');
+        return;
+    }
+
+    // Assign the role to the user
+    $user = new WP_User($user_id);
+    $user->set_role($role);
+}, 10, 2);
